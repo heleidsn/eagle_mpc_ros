@@ -1,8 +1,8 @@
 trajectory:
   robot:
     name: "hextilt"
-    urdf: "/home/pepms/robotics/libraries/example-robot-data/robots/hextilt_description/urdf/hextilt.urdf"
-    follow: "/home/pepms/wsros/mpc-ws/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hextilt.yaml"
+    urdf: "/home/helei/catkin_ams/src/my_eagle_mpc_resources/example-robot-data/robots/hextilt_description/urdf/hextilt.urdf"
+    follow: "/home/helei/catkin_ams/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hextilt.yaml"
 
   stages:
     - name: "navigation"
