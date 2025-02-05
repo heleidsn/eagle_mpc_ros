@@ -1,8 +1,8 @@
 trajectory:
   robot:
     name: "iris"
-    urdf: "/home/pepms/robotics/libraries/example-robot-data/robots/iris_description/robots/iris.urdf"
-    follow: "/home/pepms/wsros/mpc-ws/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/iris.yaml"
+    urdf: "/home/helei/catkin_ams_new/src/example_robot_data/robots/iris_description/robots/iris.urdf"
+    follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/iris.yaml"
   
   stages:
     - name: "nav_wp1"

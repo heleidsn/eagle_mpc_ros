@@ -1,8 +1,8 @@
 trajectory:
   robot:
     name: "hexacopter680_flying_arm_2"
-    urdf: "/home/pepms/robotics/libraries/example-robot-data/robots/hexacopter680_description/urdf/hexacopter680_flying_arm_2.urdf"
-    follow: "/home/pepms/wsros/mpc-ws/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hexacopter680.yaml"
+    urdf: "/home/helei/catkin_ams_new/src/example_robot_data/robots/hexacopter680_description/urdf/hexacopter680_flying_arm_2.urdf"
+    follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hexacopter680.yaml"
 
   stages:
     - name: "navigation"
