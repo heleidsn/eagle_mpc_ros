@@ -17,14 +17,14 @@ trajectory:
       transition: true
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -34,28 +34,28 @@ trajectory:
       duration: 0 #ms
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1]
 
         - name: "placement_base_link"
-          type: "CostModelFramePlacement"
+          type: "ResidualModelFramePlacement"
           weight: 1000
           link_name: "hexacopter370__base_link"
           position: [0, 0, 2.5]
           orientation: [0, 0, 0, 1] # x,y,z,w
 
         - name: "motion_base_link"
-          type: "CostModelFrameVelocity"
+          type: "ResidualModelFrameVelocity"
           weight: 1000
           link_name: "hexacopter370__base_link"
           linear: [0, 0, 0]
@@ -66,14 +66,14 @@ trajectory:
       transition: true
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -83,28 +83,28 @@ trajectory:
       duration: 0 #ms
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1]
 
         - name: "placement_base_link"
-          type: "CostModelFramePlacement"
+          type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "hexacopter370__base_link"
           position: [6.0, 0, 2.0]
           orientation: [1, 0, 0, 1] # x,y,z,w
 
         - name: "motion_base_link"
-          type: "CostModelFrameVelocity"
+          type: "ResidualModelFrameVelocity"
           weight: 2000
           link_name: "hexacopter370__base_link"
           linear: [5.0, 0, 0]
@@ -115,14 +115,14 @@ trajectory:
       transition: true
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -132,28 +132,28 @@ trajectory:
       duration: 0 #ms
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1]
 
         - name: "placement_base_link"
-          type: "CostModelFramePlacement"
+          type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "hexacopter370__base_link"
           position: [11.0, 0, 2.0]
           orientation: [0, 0, 0, 1] # x,y,z,w
 
         - name: "motion_base_link"
-          type: "CostModelFrameVelocity"
+          type: "ResidualModelFrameVelocity"
           weight: 1000
           link_name: "hexacopter370__base_link"
           linear: [0, 0, 0]

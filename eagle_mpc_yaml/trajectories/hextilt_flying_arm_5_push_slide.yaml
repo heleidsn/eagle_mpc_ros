@@ -12,21 +12,21 @@ trajectory:
       transition: true
       costs:
         - name: "reg_state"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "reg_control"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         
         - name: "state_limits"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 10
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuadraticBarrier"

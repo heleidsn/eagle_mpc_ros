@@ -12,7 +12,7 @@ trajectory:
       transition: true
       costs:
         - name: "state_reg"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -20,7 +20,7 @@ trajectory:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "state_limits"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 10
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuadraticBarrier"
@@ -30,7 +30,7 @@ trajectory:
             [0, 0, 0, 0, 0, 0, -1.9, -1.9, -1.9, 0, 0, 0, 0, 0, 0, -3, -3, -3]
 
         - name: "control_reg"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -40,7 +40,7 @@ trajectory:
       duration: 0 #ms
       costs:
         - name: "state_reg"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -48,7 +48,7 @@ trajectory:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "state_limits"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 10
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuadraticBarrier"
@@ -58,7 +58,7 @@ trajectory:
             [0, 0, 0, 0, 0, 0, -1.9, -1.9, -1.9, 0, 0, 0, 0, 0, 0, -3, -3, -3]
 
         - name: "control_reg"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -71,7 +71,7 @@ trajectory:
           position: [0, 0, 0]
 
         - name: "motion_ee"
-          type: "CostModelFrameVelocity"
+          type: "ResidualModelFrameVelocity"
           weight: 1e3
           link_name: "flying_arm_3__gripper"
           # activation: "ActivationModelWeightedQuad"
@@ -83,7 +83,7 @@ trajectory:
       duration: 200 #ms
       costs:
         - name: "state_reg"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -91,7 +91,7 @@ trajectory:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         - name: "state_limits"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 10
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuadraticBarrier"
@@ -101,7 +101,7 @@ trajectory:
             [0, 0, 0, 0, 0, 0, -1.9, -1.9, -1.9, 0, 0, 0, 0, 0, 0, -3, -3, -3]
 
         - name: "control_reg"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -114,7 +114,7 @@ trajectory:
           position: [0, 0, 0]
 
         - name: "motion_ee"
-          type: "CostModelFrameVelocity"
+          type: "ResidualModelFrameVelocity"
           weight: 500
           link_name: "flying_arm_3__gripper"
           # activation: "ActivationModelWeightedQuad"
@@ -141,14 +141,14 @@ trajectory:
       transition: true
       costs:
         - name: "state_reg"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         - name: "state_limits"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 10
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuadraticBarrier"
@@ -157,7 +157,7 @@ trajectory:
           l_bound:
             [0, 0, 0, 0, 0, 0, -1.9, -1.9, -1.9, 0, 0, 0, 0, 0, 0, -3, -3, -3]
         - name: "control_reg"
-          type: "CostModelControl"
+          type: "ResidualModelControl"
           weight: 1e-2
           reference: [0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
@@ -167,21 +167,21 @@ trajectory:
       duration: 0 #ms
       costs:
         - name: "state_arm"
-          type: "CostModelState"
+          type: "ResidualModelState"
           weight: 2000
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1]
 
         - name: "placement_base_link"
-          type: "CostModelFramePlacement"
+          type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "hexacopter370__base_link"
           position: [5, 0, 1.5]
           orientation: [0, 0, 0, 1] # x,y,z,w
 
         - name: "motion_base_link"
-          type: "CostModelFrameVelocity"
+          type: "ResidualModelFrameVelocity"
           weight: 2000
           link_name: "hexacopter370__base_link"
           linear: [0, 0, 0]
