@@ -1,7 +1,7 @@
 trajectory:
   robot:
     name: "hexacopter_370_flying_arm_3"
-    urdf: "/home/helei/catkin_ams_new/src/example_robot_data/robots/hexacopter370_description/urdf/hexacopter370_flying_arm_3.urdf"
+    urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/hexacopter370_description/urdf/hexacopter370_flying_arm_3.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hexacopter370.yaml"
 
   initial_state: [-5, 0, 1.0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -65,7 +65,7 @@ trajectory:
           weights: [1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1]
 
         - name: "translation_ee"
-          type: "CostModelFrameTranslation"
+          type: "ResidualModelFrameTranslation"
           weight: 1e4
           link_name: "flying_arm_3__gripper"
           position: [0, 0, 0]
@@ -108,7 +108,7 @@ trajectory:
           weights: [1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1]
 
         - name: "translation_ee"
-          type: "CostModelFrameTranslation"
+          type: "ResidualModelFrameTranslation"
           weight: 1000
           link_name: "flying_arm_3__gripper"
           position: [0, 0, 0]
@@ -123,7 +123,7 @@ trajectory:
           angular: [0, 0, 0]
 
         - name: "friction_cone"
-          type: "CostModelContactFrictionCone"
+          type: "ResidualModelContactFrictionCone"
           weight: 10 # working with 10
           n_surf: [0, 0, 1]
           mu: 0.7

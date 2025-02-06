@@ -8,7 +8,7 @@
 trajectory:
   robot:
     name: "hexacopter370"
-    urdf: "/home/helei/catkin_ams_new/src/example_robot_data/robots/hexacopter370_description/urdf/hexacopter370.urdf"
+    urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/hexacopter370_description/urdf/hexacopter370.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hexacopter370.yaml"
 
   stages:

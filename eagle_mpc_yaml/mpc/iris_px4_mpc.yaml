@@ -1,7 +1,7 @@
 mpc_controller:
   robot:
     name: "iris_px4"
-    urdf: "/home/helei/catkin_ams_new/src/example_robot_data/robots/iris_description/robots/iris_px4.urdf"
+    urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/iris_description/robots/iris_px4.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/iris_px4.yaml"
   integration_method: "IntegratedActionModelEuler"
   knots: 40

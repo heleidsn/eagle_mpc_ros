@@ -1,7 +1,7 @@
 trajectory:
   robot:
     name: "hextilt_flying_arm_5"
-    urdf: "/home/helei/catkin_ams_new/src/example_robot_data/robots/hextilt_description/urdf/hextilt_flying_arm_5.urdf"
+    urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/hextilt_description/urdf/hextilt_flying_arm_5.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/hextilt.yaml"
 
   initial_state: [0, 0, 1.0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
