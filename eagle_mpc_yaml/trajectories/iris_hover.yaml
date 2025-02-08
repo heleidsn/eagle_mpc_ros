@@ -1,8 +1,13 @@
 trajectory:
   robot:
     name: "iris"
+<<<<<<< HEAD
     urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/iris_description/robots/iris.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/iris.yaml"
+=======
+    urdf: "/home/helei/catkin_ams/src/my_eagle_mpc_resources/example-robot-data/robots/iris_description/robots/iris.urdf"
+    follow: "/home/helei/catkin_ams/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/iris.yaml"
+>>>>>>> 44c3c9f046d972c5559371597c6fd7f8366cdb68
 
   stages:
     - name: "navigation"
