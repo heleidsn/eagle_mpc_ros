@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   dynamic_reconfigure
   mav_msgs
+  eagle_mpc_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -153,7 +154,10 @@ add_executable(mpc_runner_node src/mpc_runner.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(mpc_runner_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(mpc_runner_node 
+  ${catkin_EXPORTED_TARGETS}
+  ${eagle_mpc_msgs_EXPORTED_TARGETS}
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(mpc_runner_node
