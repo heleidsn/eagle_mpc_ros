@@ -199,14 +199,14 @@ class MpcRunner:
         
         if self.node_params.record_solver:
             self.solver_performance_pub = rospy.Publisher(
-                "/solver_performance", SolverPerformance, queue_size=1)
+                "/hexacopter370/solver_performance", SolverPerformance, queue_size=1)
 
         if self.node_params.arm_enable:
             n_joints = self.mpc_controller.robot_model.nq - 7
             self.arm_pubs = []
             for i in range(n_joints):
                 self.arm_pubs.append(
-                    rospy.Publisher(f"/joint_command_{i+1}", Float64, queue_size=1))
+                    rospy.Publisher(f"/hexacopter370/joint{i+1}_effort_controller/command", Float64, queue_size=1))
 
     def callback_odometry_mpc(self, msg):
         with self.state_lock:
@@ -261,8 +261,7 @@ class MpcRunner:
         # Get control commands
         self.control_command = self.mpc_controller.solver.us_squash[0]
         self.thrust_command = self.control_command[:len(self.thrust_command)]
-        
-        self.speed_command = self.thrust_command / self.mpc_controller.platform_params.cf
+        self.speed_command = np.sqrt(self.thrust_command / self.mpc_controller.platform_params.cf)
 
         # Publish thrust commands
         self.msg_thrusts.header.stamp = rospy.Time.now()
@@ -293,6 +292,34 @@ class MpcRunner:
             self.server.update_configuration(params)
             self.controller_started = True
             self.controller_start_time = rospy.Time.now()
+
+    def callback_joint_state(self, msg):
+        """Handle joint state messages for the robotic arm"""
+        if not self.node_params.arm_enable:
+            return
+
+        # Check if the joint name starts with arm_name
+        if not msg.name[0].startswith(self.node_params.arm_name):
+            return
+        
+        with self.state_lock:
+            # Copy current state to avoid race conditions
+            state_new = np.copy(self.state)
+            
+            # Update joint positions and velocities
+            for i in range(len(msg.position)):
+                # Joint positions start after floating base (7 values)
+                state_new[7 + i] = msg.position[i]
+                # Joint velocities start after floating base velocities (nq + 6 values)
+                state_new[self.mpc_controller.robot_model.nq + 6 + i] = msg.velocity[i]
+            
+            # Update the state
+            self.state = state_new
+
+        # Record solver performance if enabled
+        if self.node_params.record_solver and self.node_params.record_solver_level > 0:
+            # Note: This part needs to be implemented if you need solver performance recording
+            pass
 
 if __name__ == '__main__':
     rospy.init_node('mpc_runner')
