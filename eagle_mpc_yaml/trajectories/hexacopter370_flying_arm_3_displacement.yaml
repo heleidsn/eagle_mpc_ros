@@ -232,7 +232,7 @@ trajectory:
 
 
         - name: "orientation_base_link"
-          type: "CostModelFrameRotation"
+          type: "ResidualModelFrameRotation"
           weight: 2000
           link_name: "hexacopter370__base_link"
           orientation: [0, 0, 0, 1] # x,y,z,w
