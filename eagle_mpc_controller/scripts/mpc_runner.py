@@ -5,6 +5,7 @@ import numpy as np
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState
 from mav_msgs.msg import Actuators
+from mav_msgs.msg import RollPitchYawrateThrust, RateThrust
 from std_msgs.msg import Float64
 from eagle_mpc_msgs.msg import SolverPerformance
 from dynamic_reconfigure.server import Server
@@ -13,6 +14,7 @@ import eagle_mpc
 import crocoddyl
 from threading import Lock
 import time
+from scipy.spatial.transform import Rotation as R
 
 class MpcRunner:
     def __init__(self):
@@ -77,7 +79,7 @@ class MpcRunner:
         self.node_params.automatic_start = rospy.get_param(f'{self.namespace}/automatic_start', False)
         self.node_params.arm_name = rospy.get_param(f'{self.namespace}/arm_name', '')
         self.node_params.arm_enable = bool(self.node_params.arm_name)
-
+        self.node_params.use_roll_pitch_yawrate_thrust_control = rospy.get_param(f'{self.namespace}/use_roll_pitch_yawrate_thrust_control', False)
         self.node_params.motor_command_dt = rospy.get_param(f'{self.namespace}/motor_command_dt', 0)
 
         rospy.loginfo("initializeParameters ok")
@@ -99,6 +101,7 @@ class MpcRunner:
 
         rospy.logwarn("initializeMpcController ok")
 
+        # self.node_params.trajectory_dt = 10
         problem = self.trajectory.createProblem(
             self.node_params.trajectory_dt,
             self.node_params.trajectory_squash,
@@ -177,6 +180,14 @@ class MpcRunner:
         self.msg_thrusts = Actuators()
         self.msg_thrusts.angular_velocities = [0.0] * len(self.thrust_command)
         
+        self.msg_roll_pitch_yawrate_thrust = RollPitchYawrateThrust()
+        self.msg_roll_pitch_yawrate_thrust.header.stamp = rospy.Time.now()
+        
+        self.msg_roll_pitch_yawrate_thrust.roll = 0.0
+        self.msg_roll_pitch_yawrate_thrust.pitch = 0.0
+        self.msg_roll_pitch_yawrate_thrust.yaw_rate = 0.0
+        # self.msg_roll_pitch_yawrate_thrust.thrust.thrust = 0.0
+        
         if self.node_params.record_solver:
             self.msg_solver_performance = SolverPerformance()
             if self.node_params.record_solver_level > 0:
@@ -196,6 +207,7 @@ class MpcRunner:
 
     def initialize_publishers(self):
         self.thrust_pub = rospy.Publisher("/hexacopter370/command/motor_speed", Actuators, queue_size=1)
+        self.roll_pitch_yawrate_pub = rospy.Publisher("/hexacopter370/command/roll_pitch_yawrate_thrust", RollPitchYawrateThrust, queue_size=1)
         
         if self.node_params.record_solver:
             self.solver_performance_pub = rospy.Publisher(
@@ -252,7 +264,11 @@ class MpcRunner:
         )
 
         # Get control commands and publish
-        self.publish_commands()
+        if self.node_params.use_roll_pitch_yawrate_thrust_control:
+            self.publish_commands_rate()
+        else:
+            self.publish_commands()
+        
         
         if self.node_params.record_solver:
             self.publish_solver_performance(msg)
@@ -275,6 +291,47 @@ class MpcRunner:
                 msg = Float64()
                 msg.data = self.control_command[len(self.speed_command) + i]
                 pub.publish(msg)
+
+    def publish_commands_rate(self):
+        # get control command
+        self.control_command = self.mpc_controller.solver.us_squash[0]
+        self.thrust_command = self.control_command[:len(self.thrust_command)]
+        self.speed_command = np.sqrt(self.thrust_command / self.mpc_controller.platform_params.cf)
+        
+        # get planned state
+        self.state_ref = self.mpc_controller.solver.xs[0]
+        
+        # get total thrust and angular velocities
+        self.total_thrust = np.sum(self.thrust_command)
+        
+        # get quaternion from state_ref
+        self.quaternion = self.state_ref[3:7]
+        
+        # 创建旋转对象
+        rotation = R.from_quat(self.quaternion)
+        euler_angles = rotation.as_euler('xyz', degrees=True)  # 使用 'xyz' 表示顺序，degrees=True 表示以度为单位
+        
+        # transform quaternion to roll, pitch, yaw
+        self.roll_ref = euler_angles[0]
+        self.pitch_ref = euler_angles[1]
+        self.yaw_ref = euler_angles[2]
+
+        
+        # get roll, pitch, yawrate from state_ref
+        
+        self.roll_rate_ref = self.state_ref[self.mpc_controller.robot_model.nq + 3]
+        self.pitch_rate_ref = self.state_ref[self.mpc_controller.robot_model.nq + 4]
+        self.yaw_rate_ref = self.state_ref[self.mpc_controller.robot_model.nq + 5]
+        
+        # publish roll, pitch, yawrate
+        self.msg_roll_pitch_yawrate_thrust.roll = self.roll_ref
+        self.msg_roll_pitch_yawrate_thrust.pitch = self.pitch_ref
+        self.msg_roll_pitch_yawrate_thrust.yaw_rate = self.yaw_rate_ref
+        self.msg_roll_pitch_yawrate_thrust.thrust.z = self.total_thrust
+        
+        self.roll_pitch_yawrate_pub.publish(self.msg_roll_pitch_yawrate_thrust)
+        # print(self.msg_roll_pitch_yawrate_thrust)
+        
 
     def callback_config(self, config, level):
         rospy.loginfo("RECONFIGURE_REQUEST!")
@@ -322,6 +379,8 @@ class MpcRunner:
             pass
 
 if __name__ == '__main__':
+    print(crocoddyl.__version__)
+    print(crocoddyl.__file__)
     rospy.init_node('mpc_runner')
     try:
         mpc_runner = MpcRunner()
