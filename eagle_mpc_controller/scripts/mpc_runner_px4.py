@@ -2,7 +2,7 @@
 '''
 Author: Lei He
 Date: 2025-02-19 17:29:01
-LastEditTime: 2025-02-20 11:08:38
+LastEditTime: 2025-02-21 17:36:38
 Description: New version of MPC runner for PX4 SITL with eagle MPC
 Github: https://github.com/heleidsn
 '''
@@ -267,9 +267,6 @@ class MpcRunner:
             self.controller_time = rospy.Time.now() - self.controller_start_time
             self.mpc_ref_index = int(self.controller_time.to_sec() * 1000.0)
             
-            # if self.mpc_ref_index >= int(self.trajectory_duration/self.dt_traj_opt):
-            #     self.mpc_ref_index = int(self.trajectory_duration/self.dt_traj_opt)
-            
             if self.mpc_ref_index >= 2000:
                 self.mpc_ref_index = 2000
         else:
@@ -277,7 +274,7 @@ class MpcRunner:
             
         
         # update problem
-        self.mpc_controller.updateProblem(self.mpc_ref_index)
+        self.mpc_controller.updateProblem(self.mpc_ref_index)   # update problem using current time in ms
         
         time_start = rospy.Time.now()
         self.mpc_controller.solver.solve(
@@ -327,9 +324,6 @@ class MpcRunner:
             rospy.loginfo("Not all conditions met for MPC start")
         
 #endregion
-
-
-
 
 
 if __name__ == '__main__':
