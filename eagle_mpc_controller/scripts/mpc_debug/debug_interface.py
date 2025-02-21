@@ -1,7 +1,7 @@
 '''
 Author: Lei He
 Date: 2025-02-19 11:40:31
-LastEditTime: 2025-02-21 10:01:51
+LastEditTime: 2025-02-21 15:38:14
 Description: MPC Debug Interface, useful for debugging your MPC controller before deploying it to the real robot
 Github: https://github.com/heleidsn
 '''
@@ -25,12 +25,14 @@ from utils.create_problem import get_opt_traj, create_mpc_controller
 
 from mavros_msgs.msg import AttitudeTarget
 from geometry_msgs.msg import Vector3
+from scipy.spatial.transform import Rotation as R
 
 class MpcDebugInterface(QWidget):
     def __init__(self, using_ros=False):
         super(MpcDebugInterface, self).__init__()
         self.setWindowTitle('MPC Debug Interface')
         
+        self.using_ros = using_ros
         # 创建布局
         self.layout = QVBoxLayout()
         
@@ -52,21 +54,78 @@ class MpcDebugInterface(QWidget):
         
         # 创建滑块和标签
         slider_configs = [
-            ('X', -2, 2),
-            ('Y', -2, 2),
-            ('Z', 0, 4)
+            # 位置控制 (x, y, z)
+            ('Position X', -2, 2),
+            ('Position Y', -2, 2),
+            ('Position Z', 0, 4),
+            # 姿态欧拉角控制 (roll, pitch, yaw)
+            ('Roll', -180, 180),
+            ('Pitch', -90, 90),
+            ('Yaw', -180, 180),
+            # 线速度控制 (vx, vy, vz)
+            ('Vel X', -2, 2),
+            ('Vel Y', -2, 2),
+            ('Vel Z', -2, 2),
+            # 角速度控制 (wx, wy, wz)
+            ('Ang Vel X', -2, 2),
+            ('Ang Vel Y', -2, 2),
+            ('Ang Vel Z', -2, 2)
         ]
         
-        # 创建状态滑块
-        for name, min_val, max_val in slider_configs:
-            slider_layout = self.create_state_slider(name, min_val, max_val)
-            state_layout.addLayout(slider_layout)
+        # 创建分组
+        groups = {
+            'Position': QHBoxLayout(),
+            'Orientation': QHBoxLayout(),
+            'Linear Velocity': QHBoxLayout(),
+            'Angular Velocity': QHBoxLayout()
+        }
         
-        # 图表显示
-        self.figure = Figure()
+        # 创建状态滑块
+        for i, (name, min_val, max_val) in enumerate(slider_configs):
+            slider_layout = self.create_state_slider(name, min_val, max_val)
+            
+            # 根据状态类型添加到对应分组
+            if 'Position' in name:
+                groups['Position'].addLayout(slider_layout)
+            elif name in ['Roll', 'Pitch', 'Yaw']:
+                groups['Orientation'].addLayout(slider_layout)
+            elif 'Vel' in name:
+                groups['Linear Velocity'].addLayout(slider_layout)
+            elif 'Ang Vel' in name:
+                groups['Angular Velocity'].addLayout(slider_layout)
+        
+        # 添加分组到主状态布局
+        # state_layout.addWidget(QLabel('Position Control'))
+        state_layout.addLayout(groups['Position'])
+        # state_layout.addWidget(QLabel('Linear Velocity Control'))
+        state_layout.addLayout(groups['Linear Velocity'])
+        
+        # state_layout.addWidget(QLabel('Orientation Control'))
+        state_layout.addLayout(groups['Orientation'])
+        # state_layout.addWidget(QLabel('Angular Velocity Control'))
+        state_layout.addLayout(groups['Angular Velocity'])
+        
+        # 图表显示  position, attitude, linear velocity, angular velocity
+        self.figure = Figure(figsize=(20, 10))
+        # 设置子图之间的间距
+        self.figure.subplots_adjust(
+            left=0.08,    # 左边距
+            right=0.95,   # 右边距
+            bottom=0.08,  # 下边距
+            top=0.95,     # 上边距
+            wspace=0.25,  # 子图之间的水平间距
+            hspace=0.35   # 子图之间的垂直间距
+        )
         self.canvas = FigureCanvas(self.figure)
-        self.ax = self.figure.add_subplot(211)
-        self.ax_rate = self.figure.add_subplot(212)
+        plot_row_num = 3
+        plot_col_num = 2
+        self.ax_state = self.figure.add_subplot(plot_row_num, plot_col_num, 1)  # 状态
+        self.ax_attitude = self.figure.add_subplot(plot_row_num, plot_col_num, 2)  # 姿态
+        self.ax_linear_velocity = self.figure.add_subplot(plot_row_num, plot_col_num, 3)  # 线速度
+        self.ax_angular_velocity = self.figure.add_subplot(plot_row_num, plot_col_num, 4)  # 角速度
+        
+        self.ax_control = self.figure.add_subplot(plot_row_num, plot_col_num, 5)  # 控制
+        self.ax_time = self.figure.add_subplot(plot_row_num, plot_col_num, 6)   # 求解时间
         
         # 添加到主布局
         self.layout.addLayout(time_layout)
@@ -77,17 +136,17 @@ class MpcDebugInterface(QWidget):
         # 数据存储
         self.state_history = []
         self.control_history = []
+        self.mpc_solve_time_history = []  # 存储求解时间历史
         
         # 定时更新图表
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_plot)
-        self.timer.start(1000)  # 10Hz更新
+        self.timer.start(100)  # 10Hz更新
         
         # initialize MPC
-        
         robotName = 'iris'
         trajectoryName = 'hover'
-        self.dt_traj_opt = 20
+        self.dt_traj_opt = 20  # ms
         useSquash = True
         
         yaml_file_path = "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml"
@@ -99,8 +158,10 @@ class MpcDebugInterface(QWidget):
             useSquash,
             yaml_file_path)
         
+        self.traj_solver = traj_solver
+        
         # create mpc controller to get tau_f
-        mpc_name = "rail"
+        mpc_name = "carrot"
         mpc_yaml = '{}/mpc/{}_mpc.yaml'.format(yaml_file_path, robotName)
         self.mpc_controller = create_mpc_controller(
             mpc_name,
@@ -110,13 +171,19 @@ class MpcDebugInterface(QWidget):
             mpc_yaml
         )
         
+        self.mpc_controller.solver.setCallbacks([])  # 取消回调函数输出
+        
         self.state = self.mpc_controller.state.zero()
         self.state_ref = np.copy(self.mpc_controller.state_ref)
         self.mpc_ref_index = 0
         self.solving_time = 0.0
         
+        # 存储MPC的时间步长
+        self.dt_mpc = self.mpc_controller.dt  # 转换为毫秒
+        print(f"Trajectory dt: {self.dt_traj_opt}ms, MPC dt: {self.dt_mpc}ms")
+        
         # create mpc controller with different timer
-        if using_ros:
+        if self.using_ros:
             rospy.loginfo("MPC controller initialized")
             
             # ROS订阅和发布
@@ -143,10 +210,10 @@ class MpcDebugInterface(QWidget):
         else:
             self.mpc_rate = 10.0  # Hz
             self.mpc_timer = QtCore.QTimer()
-            self.mpc_timer.timeout.connect(self.mpc_timer_callback)
+            self.mpc_timer.timeout.connect(self.mpc_running_callback)
             self.mpc_timer.start(int(1000/self.mpc_rate))
             
-#region --------------Ros interface--------------------------------
+    #region --------------Ros interface--------------------------------
     def mpc_timer_callback_ros(self, event):
         
         self.mpc_controller.problem.x0 = self.state
@@ -269,9 +336,9 @@ class MpcDebugInterface(QWidget):
         # 更新显示的值
         self.state_labels[axis].setText(f'{value:.2f}')
 
-#endregion
+    #endregion
 
-#region --------------QT without ROS--------------------------------
+    #region --------------QT without ROS--------------------------------
     def create_state_slider(self, name, min_val, max_val):
         layout = QVBoxLayout()
         
@@ -301,15 +368,63 @@ class MpcDebugInterface(QWidget):
     def state_changed(self, axis, value):
         print("state changed: ", axis, value)
         
-        if axis == 'X':
+        # 获取当前四元数
+        current_quat = self.state[3:7]
+        # 转换为欧拉角
+        euler = R.from_quat(current_quat).as_euler('xyz', degrees=True)
+        
+        if 'Position X' in axis:
             self.state[0] = value
-        elif axis == 'Y':
+        elif 'Position Y' in axis:
             self.state[1] = value
-        elif axis == 'Z':
+        elif 'Position Z' in axis:
             self.state[2] = value
+        elif 'Roll' in axis:
+            euler[0] = value
+            quat = R.from_euler('xyz', euler, degrees=True).as_quat()
+            self.state[3:7] = quat
+        elif 'Pitch' in axis:
+            euler[1] = value
+            quat = R.from_euler('xyz', euler, degrees=True).as_quat()
+            self.state[3:7] = quat
+        elif 'Yaw' in axis:
+            euler[2] = value
+            quat = R.from_euler('xyz', euler, degrees=True).as_quat()
+            self.state[3:7] = quat
+        elif 'Vel X' in axis:
+            self.state[7] = value
+        elif 'Vel Y' in axis:
+            self.state[8] = value
+        elif 'Vel Z' in axis:
+            self.state[9] = value
+        elif 'Ang Vel X' in axis:
+            self.state[10] = value
+        elif 'Ang Vel Y' in axis:
+            self.state[11] = value
+        elif 'Ang Vel Z' in axis:
+            self.state[12] = value
         
         # 更新显示的值
         self.state_labels[axis].setText(f'{value:.2f}')
+        
+        # 如果是姿态变化，更新所有姿态滑块
+        if any(name in axis for name in ['Roll', 'Pitch', 'Yaw']):
+            euler = R.from_quat(self.state[3:7]).as_euler('xyz', degrees=True)
+            self.state_sliders['Roll'].blockSignals(True)
+            self.state_sliders['Pitch'].blockSignals(True)
+            self.state_sliders['Yaw'].blockSignals(True)
+            
+            self.state_sliders['Roll'].setValue(int(euler[0]))
+            self.state_sliders['Pitch'].setValue(int(euler[1]))
+            self.state_sliders['Yaw'].setValue(int(euler[2]))
+            
+            self.state_labels['Roll'].setText(f'{euler[0]:.2f}')
+            self.state_labels['Pitch'].setText(f'{euler[1]:.2f}')
+            self.state_labels['Yaw'].setText(f'{euler[2]:.2f}')
+            
+            self.state_sliders['Roll'].blockSignals(False)
+            self.state_sliders['Pitch'].blockSignals(False)
+            self.state_sliders['Yaw'].blockSignals(False)
         
     def time_changed(self, value):
         # 发布新的时间戳
@@ -317,7 +432,7 @@ class MpcDebugInterface(QWidget):
         if self.using_ros:
             self.time_pub.publish(Float64(value))
         
-        self.time_label.setText(f'{value} ms')
+        # self.time_label.setText(f'{value} ms')
         
         self.mpc_ref_index = int(value / self.dt_traj_opt)
         
@@ -329,10 +444,11 @@ class MpcDebugInterface(QWidget):
         elif self.mpc_ref_index > len(self.state_ref):
             self.mpc_ref_index = len(self.state_ref)
             
-    def mpc_timer_callback(self):
+    def mpc_running_callback(self):
         # calculate the mpc output
         self.mpc_controller.problem.x0 = self.state
-        self.mpc_controller.updateProblem(self.mpc_ref_index)
+        print(self.mpc_ref_index, len(self.state_ref))
+        self.mpc_controller.updateProblem(self.mpc_ref_index*self.dt_traj_opt)
         
         time_start = time.time()
         self.mpc_controller.solver.solve(
@@ -343,49 +459,181 @@ class MpcDebugInterface(QWidget):
         time_end = time.time()
         self.solving_time = time_end - time_start
         
+        # 记录求解时间
+        self.mpc_solve_time_history.append(self.solving_time)
+        if len(self.mpc_solve_time_history) > 100:
+            self.mpc_solve_time_history.pop(0)
+        
         print("solving time: {:.2f} ms".format(self.solving_time * 1000))
         print("state: ", self.state)
 
-#endregion
+    #endregion
 
+    #region --------------plot--------------------------------  
     def update_plot(self):
-        # update the plot
+        # 更新状态图
         state_predict = np.array(self.mpc_controller.solver.xs)
         state_ref = np.array(self.mpc_controller.state_ref)
+        self.update_state_plot(state_predict, state_ref)
+        self.update_attitude_plot(state_predict, state_ref)
+        self.update_linear_velocity_plot(state_predict, state_ref)
+        self.update_angular_velocity_plot(state_predict, state_ref)
         
-        self.ax.clear()
+        # update control plot
+        control_predict = np.array(self.mpc_controller.solver.us_squash)
+        control_ref = np.array(self.traj_solver.us_squash)
+        self.update_control_plot(control_predict, control_ref)
         
-        self.ax.set_title('MPC Debug Interface')
-        self.ax.set_xlabel('Time (ms)')
-        self.ax.set_ylabel('State')
+        # 更新求解时间图
+        self.ax_time.clear()
+        self.ax_time.set_title('MPC Solve Time')
+        self.ax_time.set_xlabel('Iteration')
+        self.ax_time.set_ylabel('Time (ms)')
         
-        self.ax.plot(state_predict[:, 0], label='X')
-        self.ax.plot(state_predict[:, 1], label='Y')
-        self.ax.plot(state_predict[:, 2], label='Z')
-        self.ax.plot(state_ref[:, 0], label='X_ref')
-        self.ax.plot(state_ref[:, 1], label='Y_ref')
-        self.ax.plot(state_ref[:, 2], label='Z_ref')
+        if self.mpc_solve_time_history:
+            times = range(len(self.mpc_solve_time_history))
+            self.ax_time.plot(times, [t*1000 for t in self.mpc_solve_time_history], 'b-', label='Solve Time')
+            self.ax_time.axhline(y=np.mean([t*1000 for t in self.mpc_solve_time_history]), color='r', linestyle='--', label='Mean')
+            self.ax_time.legend()
         
-        self.ax.legend()
+        # 自动调整子图布局
+        self.figure.tight_layout()
         self.canvas.draw()
         
-        # 创建subplot for rate target
-        # self.ax_rate = self.figure.add_subplot(122)
-        # self.ax_rate.clear()
-        # self.ax_rate.set_title('Rate Target')   
-        # self.ax_rate.set_xlabel('Time (ms)')
-        # self.ax_rate.set_ylabel('Rate')
+    def update_state_plot(self, state_predict, state_ref):
+        self.ax_state.clear()
         
-        # self.ax_rate.plot(state_predict[:, -3], label='Roll Rate')
-        # self.ax_rate.plot(state_predict[:, -2], label='Pitch Rate')
-        # self.ax_rate.plot(state_predict[:, -1], label='Yaw Rate')
+        self.ax_state.set_title('State')
+        self.ax_state.set_xlabel('Time (s)')
+        self.ax_state.set_ylabel('Position (m)')
         
-        # self.ax_rate.plot(state_ref[:, -3], label='Roll Rate SP')
-        # self.ax_rate.plot(state_ref[:, -2], label='Pitch Rate SP')
-        # self.ax_rate.plot(state_ref[:, -1], label='Yaw Rate SP')
+        # 计算参考轨迹时间轴 (使用轨迹优化的dt)
+        ref_time = np.arange(len(state_ref)) * self.dt_traj_opt / 1000.0
         
-        # self.ax_rate.legend()
-        # self.canvas.draw()
+        # 计算预测轨迹时间轴 (使用MPC的dt)
+        predict_start_time = self.mpc_ref_index * self.dt_traj_opt / 1000.0
+        predict_time = predict_start_time + np.arange(len(state_predict)) * self.dt_mpc / 1000.0
+        
+        self.ax_state.plot(predict_time,
+                         state_predict[:, 0], label='X', color='red')
+        self.ax_state.plot(predict_time,
+                         state_predict[:, 1], label='Y', color='green')
+        self.ax_state.plot(predict_time,
+                         state_predict[:, 2], label='Z', color='blue')
+        
+        self.ax_state.plot(ref_time, state_ref[:, 0], label='X_ref', linestyle='--', color='red')
+        self.ax_state.plot(ref_time, state_ref[:, 1], label='Y_ref', linestyle='--', color='green')
+        self.ax_state.plot(ref_time, state_ref[:, 2], label='Z_ref', linestyle='--', color='blue')
+        
+        self.ax_state.legend()
+
+    def update_attitude_plot(self, state_predict, state_ref):
+        # 更新姿态图
+        self.ax_attitude.clear()
+        self.ax_attitude.set_title('Attitude')
+        self.ax_attitude.set_xlabel('Time (s)')
+        self.ax_attitude.set_ylabel('Angle (deg)')
+        
+        # 将预测状态和参考状态的四元数转换为欧拉角
+        euler_predict = np.array([R.from_quat(q).as_euler('xyz', degrees=True) 
+                                 for q in state_predict[:, 3:7]])
+        euler_ref = np.array([R.from_quat(q).as_euler('xyz', degrees=True) 
+                             for q in state_ref[:, 3:7]])
+        
+        # 计算参考轨迹时间轴 (使用轨迹优化的dt)
+        ref_time = np.arange(len(state_ref)) * self.dt_traj_opt / 1000.0
+        
+        # 计算预测轨迹时间轴 (使用MPC的dt)
+        predict_start_time = self.mpc_ref_index * self.dt_traj_opt / 1000.0
+        predict_time = predict_start_time + np.arange(len(state_predict)) * self.dt_mpc / 1000.0
+        
+        # 绘制欧拉角
+        self.ax_attitude.plot(predict_time,
+                            euler_predict[:, 0], label='Roll')
+        self.ax_attitude.plot(predict_time,
+                            euler_predict[:, 1], label='Pitch')
+        self.ax_attitude.plot(predict_time,
+                            euler_predict[:, 2], label='Yaw')
+        
+        self.ax_attitude.plot(ref_time, euler_ref[:, 0], label='Roll SP', linestyle='--')
+        self.ax_attitude.plot(ref_time, euler_ref[:, 1], label='Pitch SP', linestyle='--')
+        self.ax_attitude.plot(ref_time, euler_ref[:, 2], label='Yaw SP', linestyle='--')
+        
+        self.ax_attitude.legend()
+        
+    def update_linear_velocity_plot(self, state_predict, state_ref):
+        self.ax_linear_velocity.clear()
+        self.ax_linear_velocity.set_title('Linear Velocity')
+        self.ax_linear_velocity.set_xlabel('Time (s)')
+        self.ax_linear_velocity.set_ylabel('Velocity (m/s)')
+        
+        # 计算参考轨迹时间轴 (使用轨迹优化的dt)
+        ref_time = np.arange(len(state_ref)) * self.dt_traj_opt / 1000.0
+        
+        # 计算预测轨迹时间轴 (使用MPC的dt)
+        predict_start_time = self.mpc_ref_index * self.dt_traj_opt / 1000.0
+        predict_time = predict_start_time + np.arange(len(state_predict)) * self.dt_mpc / 1000.0
+        
+        index_plot = 7
+        
+        self.ax_linear_velocity.plot(predict_time, state_predict[:, index_plot], label='X', color='red')
+        self.ax_linear_velocity.plot(predict_time, state_predict[:, index_plot+1], label='Y', color='green')
+        self.ax_linear_velocity.plot(predict_time, state_predict[:, index_plot+2], label='Z', color='blue')
+        
+        self.ax_linear_velocity.plot(ref_time, state_ref[:, index_plot], label='X_ref', linestyle='--', color='red')
+        self.ax_linear_velocity.plot(ref_time, state_ref[:, index_plot+1], label='Y_ref', linestyle='--', color='green')
+        self.ax_linear_velocity.plot(ref_time, state_ref[:, index_plot+2], label='Z_ref', linestyle='--', color='blue')
+        
+        self.ax_linear_velocity.legend()
+        
+    def update_angular_velocity_plot(self, state_predict, state_ref):
+        self.ax_angular_velocity.clear()
+        self.ax_angular_velocity.set_title('Angular Velocity')
+        self.ax_angular_velocity.set_xlabel('Time (s)')
+        self.ax_angular_velocity.set_ylabel('Velocity (rad/s)')
+        
+        # 计算参考轨迹时间轴 (使用轨迹优化的dt)
+        ref_time = np.arange(len(state_ref)) * self.dt_traj_opt / 1000.0
+        
+        # 计算预测轨迹时间轴 (使用MPC的dt)
+        predict_start_time = self.mpc_ref_index * self.dt_traj_opt / 1000.0
+        predict_time = predict_start_time + np.arange(len(state_predict)) * self.dt_mpc / 1000.0
+        
+        index_plot = 10
+        
+        self.ax_angular_velocity.plot(predict_time, state_predict[:, index_plot], label='X', color='red')
+        self.ax_angular_velocity.plot(predict_time, state_predict[:, index_plot+1], label='Y', color='green')
+        self.ax_angular_velocity.plot(predict_time, state_predict[:, index_plot+2], label='Z', color='blue')
+        
+        self.ax_angular_velocity.plot(ref_time, state_ref[:, index_plot], label='X_ref', linestyle='--', color='red')
+        self.ax_angular_velocity.plot(ref_time, state_ref[:, index_plot+1], label='Y_ref', linestyle='--', color='green')
+        self.ax_angular_velocity.plot(ref_time, state_ref[:, index_plot+2], label='Z_ref', linestyle='--', color='blue')
+        
+        self.ax_angular_velocity.legend()
+        
+    def update_control_plot(self, control_predict, control_ref):
+        self.ax_control.clear()
+        self.ax_control.set_title('Control')
+        self.ax_control.set_xlabel('Time (s)')
+        self.ax_control.set_ylabel('Control')
+        
+        # 计算参考轨迹时间轴 (使用轨迹优化的dt)
+        ref_time = np.arange(len(control_ref)) * self.dt_traj_opt / 1000.0
+        
+        # 计算预测轨迹时间轴 (使用MPC的dt)
+        predict_start_time = self.mpc_ref_index * self.dt_traj_opt / 1000.0
+        predict_time = predict_start_time + np.arange(len(control_predict)) * self.dt_mpc / 1000.0
+        
+        control_num = control_predict.shape[1]
+        for i in range(control_num):
+            self.ax_control.plot(predict_time,
+                                 control_predict[:, i], label='Control_{}'.format(i))
+            self.ax_control.plot(ref_time, control_ref[:, i],
+                                 label='Control_ref_{}'.format(i), linestyle='--')
+        
+        self.ax_control.legend()
+        
+    #endregion
 
 
 if __name__ == '__main__':
