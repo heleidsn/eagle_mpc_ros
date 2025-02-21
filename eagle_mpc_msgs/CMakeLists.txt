@@ -28,6 +28,8 @@ add_message_files(
   Waypoint.msg
   WholeBodyState.msg
   WholeBodyTrajectory.msg
+  MpcControl.msg
+  MpcState.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
