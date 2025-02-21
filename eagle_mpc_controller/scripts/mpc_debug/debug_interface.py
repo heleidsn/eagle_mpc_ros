@@ -1,7 +1,7 @@
 '''
 Author: Lei He
 Date: 2025-02-19 11:40:31
-LastEditTime: 2025-02-21 09:41:43
+LastEditTime: 2025-02-21 10:01:51
 Description: MPC Debug Interface, useful for debugging your MPC controller before deploying it to the real robot
 Github: https://github.com/heleidsn
 '''
@@ -9,6 +9,7 @@ Github: https://github.com/heleidsn
 
 import rospy
 import numpy as np
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider
 from eagle_mpc_msgs.msg import MpcState, MpcControl
@@ -56,6 +57,7 @@ class MpcDebugInterface(QWidget):
             ('Z', 0, 4)
         ]
         
+        # 创建状态滑块
         for name, min_val, max_val in slider_configs:
             slider_layout = self.create_state_slider(name, min_val, max_val)
             state_layout.addLayout(slider_layout)
@@ -79,7 +81,7 @@ class MpcDebugInterface(QWidget):
         # 定时更新图表
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_plot)
-        self.timer.start(100)  # 10Hz更新
+        self.timer.start(1000)  # 10Hz更新
         
         # initialize MPC
         
@@ -113,30 +115,39 @@ class MpcDebugInterface(QWidget):
         self.mpc_ref_index = 0
         self.solving_time = 0.0
         
-        rospy.loginfo("MPC controller initialized")
+        # create mpc controller with different timer
+        if using_ros:
+            rospy.loginfo("MPC controller initialized")
+            
+            # ROS订阅和发布
+            self.pose_pub = rospy.Publisher('/debug/pose', PoseStamped, queue_size=1)
+            self.time_pub = rospy.Publisher('/debug/time', Float64, queue_size=1)
+            
+            self.state_sub = rospy.Subscriber('/debug/mpc_state', MpcState, self.state_callback)
+            self.control_sub = rospy.Subscriber('/debug/mpc_control', MpcControl, self.control_callback)
+            
+            
+            self.mpc_state_pub = rospy.Publisher('/mpc/state', MpcState, queue_size=10)
+            self.mpc_control_pub = rospy.Publisher('/mpc/control', MpcControl, queue_size=10)
+            
+            self.solving_time_pub = rospy.Publisher('/mpc/solving_time', Float64, queue_size=1)
+            
+            self.attitude_pub = rospy.Publisher('/mavros/setpoint_raw/attitude', AttitudeTarget, queue_size=10)
+            
+            # start MPC controller and wait for it to start
+            self.mpc_rate = 10.0  # Hz
+            self.mpc_timer = rospy.Timer(rospy.Duration(1.0/self.mpc_rate), self.mpc_timer_callback_ros)
+            
+            rospy.loginfo(f"MPC started at {self.mpc_rate}Hz")
         
-        # ROS订阅和发布
-        self.pose_pub = rospy.Publisher('/debug/pose', PoseStamped, queue_size=1)
-        self.time_pub = rospy.Publisher('/debug/time', Float64, queue_size=1)
-        
-        self.state_sub = rospy.Subscriber('/debug/mpc_state', MpcState, self.state_callback)
-        self.control_sub = rospy.Subscriber('/debug/mpc_control', MpcControl, self.control_callback)
-        
-        
-        self.mpc_state_pub = rospy.Publisher('/mpc/state', MpcState, queue_size=10)
-        self.mpc_control_pub = rospy.Publisher('/mpc/control', MpcControl, queue_size=10)
-        
-        self.solving_time_pub = rospy.Publisher('/mpc/solving_time', Float64, queue_size=1)
-        
-        self.attitude_pub = rospy.Publisher('/mavros/setpoint_raw/attitude', AttitudeTarget, queue_size=10)
-        
-        # start MPC controller and wait for it to start
-        self.mpc_rate = 10.0  # Hz
-        self.mpc_timer = rospy.Timer(rospy.Duration(1.0/self.mpc_rate), self.mpc_timer_callback)
-        
-        rospy.loginfo(f"MPC started at {self.mpc_rate}Hz")
-        
-    def mpc_timer_callback(self, event):
+        else:
+            self.mpc_rate = 10.0  # Hz
+            self.mpc_timer = QtCore.QTimer()
+            self.mpc_timer.timeout.connect(self.mpc_timer_callback)
+            self.mpc_timer.start(int(1000/self.mpc_rate))
+            
+#region --------------Ros interface--------------------------------
+    def mpc_timer_callback_ros(self, event):
         
         self.mpc_controller.problem.x0 = self.state
         
@@ -154,9 +165,8 @@ class MpcDebugInterface(QWidget):
         self.solving_time = (time_end - time_start).to_sec()
         
         # 发布MPC数据
-        # self.publish_mpc_data()
-        
-        # self.publish_mavros_rate_command()
+        self.publish_mpc_data()
+        self.publish_mavros_rate_command()
         
     def publish_mavros_rate_command(self):
         # using mavros setpoint to achieve rate control
@@ -220,6 +230,48 @@ class MpcDebugInterface(QWidget):
         self.mpc_control_pub.publish(control_msg)
         self.solving_time_pub.publish(Float64(self.solving_time))
         
+    def state_callback(self, msg):
+        self.state_history.append(msg)
+        if len(self.state_history) > 100:
+            self.state_history.pop(0)
+            
+        # 更新滑块位置以匹配当前状态
+        if self.state_history:
+            current_state = self.state_history[-1].state
+            for i, axis in enumerate(['X', 'Y', 'Z']):
+                self.state_sliders[axis].blockSignals(True)  # 防止触发回调
+                self.state_sliders[axis].setValue(int(current_state[i] * 100))
+                self.state_labels[axis].setText(f'{current_state[i]:.2f}')
+                self.state_sliders[axis].blockSignals(False)
+            
+    def control_callback(self, msg):
+        self.control_history.append(msg)
+        if len(self.control_history) > 100:
+            self.control_history.pop(0)
+
+    def state_changed_ros(self, axis, value):
+        # 发布新的位置
+        pose = PoseStamped()
+        pose.header.stamp = rospy.Time.now()
+        pose.header.frame_id = "world"
+        if axis == 'X':
+            pose.pose.position.x = value
+            self.state[0] = value
+        elif axis == 'Y':
+            pose.pose.position.y = value
+            self.state[1] = value
+        elif axis == 'Z':
+            pose.pose.position.z = value
+            self.state[2] = value
+        
+        self.pose_pub.publish(pose)
+        
+        # 更新显示的值
+        self.state_labels[axis].setText(f'{value:.2f}')
+
+#endregion
+
+#region --------------QT without ROS--------------------------------
     def create_state_slider(self, name, min_val, max_val):
         layout = QVBoxLayout()
         
@@ -245,10 +297,26 @@ class MpcDebugInterface(QWidget):
         self.state_labels[name] = value_label
         
         return layout
+    
+    def state_changed(self, axis, value):
+        print("state changed: ", axis, value)
+        
+        if axis == 'X':
+            self.state[0] = value
+        elif axis == 'Y':
+            self.state[1] = value
+        elif axis == 'Z':
+            self.state[2] = value
+        
+        # 更新显示的值
+        self.state_labels[axis].setText(f'{value:.2f}')
         
     def time_changed(self, value):
         # 发布新的时间戳
-        self.time_pub.publish(Float64(value))
+        
+        if self.using_ros:
+            self.time_pub.publish(Float64(value))
+        
         self.time_label.setText(f'{value} ms')
         
         self.mpc_ref_index = int(value / self.dt_traj_opt)
@@ -260,50 +328,28 @@ class MpcDebugInterface(QWidget):
             self.mpc_ref_index = 0
         elif self.mpc_ref_index > len(self.state_ref):
             self.mpc_ref_index = len(self.state_ref)
-        
-        
-    def state_changed(self, axis, value):
-        # 发布新的位置
-        pose = PoseStamped()
-        pose.header.stamp = rospy.Time.now()
-        pose.header.frame_id = "world"
-        if axis == 'X':
-            pose.pose.position.x = value
-            self.state[0] = value
-        elif axis == 'Y':
-            pose.pose.position.y = value
-            self.state[1] = value
-        elif axis == 'Z':
-            pose.pose.position.z = value
-            self.state[2] = value
-        
-        self.pose_pub.publish(pose)
-        
-        # 更新显示的值
-        self.state_labels[axis].setText(f'{value:.2f}')
-        
-    def state_callback(self, msg):
-        self.state_history.append(msg)
-        if len(self.state_history) > 100:
-            self.state_history.pop(0)
             
-        # 更新滑块位置以匹配当前状态
-        if self.state_history:
-            current_state = self.state_history[-1].state
-            for i, axis in enumerate(['X', 'Y', 'Z']):
-                self.state_sliders[axis].blockSignals(True)  # 防止触发回调
-                self.state_sliders[axis].setValue(int(current_state[i] * 100))
-                self.state_labels[axis].setText(f'{current_state[i]:.2f}')
-                self.state_sliders[axis].blockSignals(False)
-            
-    def control_callback(self, msg):
-        self.control_history.append(msg)
-        if len(self.control_history) > 100:
-            self.control_history.pop(0)
-            
+    def mpc_timer_callback(self):
+        # calculate the mpc output
+        self.mpc_controller.problem.x0 = self.state
+        self.mpc_controller.updateProblem(self.mpc_ref_index)
+        
+        time_start = time.time()
+        self.mpc_controller.solver.solve(
+            self.mpc_controller.solver.xs,
+            self.mpc_controller.solver.us,
+            self.mpc_controller.iters
+        )
+        time_end = time.time()
+        self.solving_time = time_end - time_start
+        
+        print("solving time: {:.2f} ms".format(self.solving_time * 1000))
+        print("state: ", self.state)
+
+#endregion
+
     def update_plot(self):
-        
-        
+        # update the plot
         state_predict = np.array(self.mpc_controller.solver.xs)
         state_ref = np.array(self.mpc_controller.state_ref)
         
@@ -344,10 +390,13 @@ class MpcDebugInterface(QWidget):
 
 if __name__ == '__main__':
     import sys
-    rospy.init_node('mpc_debug_interface')
+    
+    using_ros = False
+    if using_ros:
+        rospy.init_node('mpc_debug_interface')
     
     app = QtWidgets.QApplication(sys.argv)
-    window = MpcDebugInterface()
+    window = MpcDebugInterface(using_ros=using_ros)
     window.show()
     
     sys.exit(app.exec_()) 
