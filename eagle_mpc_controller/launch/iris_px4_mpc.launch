@@ -53,7 +53,7 @@
     </include>
 
     <!-- Robot & maneuver -->
-    <arg name="mav_name" default="hexacopter370" />
+    <arg name="mav_name" default="iris" />
     <arg name="trajectory_name" default="hover" />
     <arg name="arm_enable" default="false" />
     <arg name="arm_name" default="flying_arm_3" />
