@@ -1,7 +1,7 @@
 '''
 Author: Lei He
 Date: 2025-02-19 11:40:31
-LastEditTime: 2025-02-21 15:38:14
+LastEditTime: 2025-02-21 16:17:25
 Description: MPC Debug Interface, useful for debugging your MPC controller before deploying it to the real robot
 Github: https://github.com/heleidsn
 '''
@@ -52,58 +52,78 @@ class MpcDebugInterface(QWidget):
         self.state_sliders = {}
         self.state_labels = {}
         
+        # 创建状态组布局
+        state_groups = {
+            'Position (m)': ['X', 'Y', 'Z'],
+            'Orientation (deg)': ['roll', 'pitch', 'yaw'],
+            'Linear Velocity (m/s)': ['vx', 'vy', 'vz'],
+            'Angular Velocity (deg/s)': ['wx', 'wy', 'wz']
+        }
+        
         # 创建滑块和标签
         slider_configs = [
             # 位置控制 (x, y, z)
-            ('Position X', -2, 2),
-            ('Position Y', -2, 2),
-            ('Position Z', 0, 4),
+            ('X', -2, 2),
+            ('Y', -2, 2),
+            ('Z', 0, 4),
             # 姿态欧拉角控制 (roll, pitch, yaw)
-            ('Roll', -180, 180),
-            ('Pitch', -90, 90),
-            ('Yaw', -180, 180),
+            ('roll', -90, 90),
+            ('pitch', -90, 90),
+            ('yaw', -90, 90),
             # 线速度控制 (vx, vy, vz)
-            ('Vel X', -2, 2),
-            ('Vel Y', -2, 2),
-            ('Vel Z', -2, 2),
+            ('vx', -2, 2),
+            ('vy', -2, 2),
+            ('vz', -2, 2),
             # 角速度控制 (wx, wy, wz)
-            ('Ang Vel X', -2, 2),
-            ('Ang Vel Y', -2, 2),
-            ('Ang Vel Z', -2, 2)
+            ('wx', -90, 90),
+            ('wy', -90, 90),
+            ('wz', -90, 90)
         ]
         
-        # 创建分组
-        groups = {
-            'Position': QHBoxLayout(),
-            'Orientation': QHBoxLayout(),
-            'Linear Velocity': QHBoxLayout(),
-            'Angular Velocity': QHBoxLayout()
-        }
-        
-        # 创建状态滑块
-        for i, (name, min_val, max_val) in enumerate(slider_configs):
-            slider_layout = self.create_state_slider(name, min_val, max_val)
+        # 为每个组创建一个垂直布局
+        for group_name, states in state_groups.items():
+            # 创建一个QGroupBox作为容器
+            group_box = QtWidgets.QGroupBox()
+            group_box.setTitle(group_name)
             
-            # 根据状态类型添加到对应分组
-            if 'Position' in name:
-                groups['Position'].addLayout(slider_layout)
-            elif name in ['Roll', 'Pitch', 'Yaw']:
-                groups['Orientation'].addLayout(slider_layout)
-            elif 'Vel' in name:
-                groups['Linear Velocity'].addLayout(slider_layout)
-            elif 'Ang Vel' in name:
-                groups['Angular Velocity'].addLayout(slider_layout)
+            # 创建垂直布局作为GroupBox的内部布局
+            group_layout = QVBoxLayout(group_box)
+            group_layout.setSpacing(10)
+            group_layout.setContentsMargins(10, 15, 10, 10)  # 左、上、右、下的边距
+            
+            # 设置GroupBox的样式
+            group_box.setStyleSheet("""
+                QGroupBox {
+                    font-weight: bold;
+                    border: 2px solid gray;
+                    border-radius: 5px;
+                    margin-top: 1ex;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    subcontrol-position: top center;
+                    padding: 0 5px;
+                    color: darkblue;
+                }
+            """)
+            
+            # 创建水平布局来放置该组的所有状态
+            states_layout = QHBoxLayout()
+            states_layout.setSpacing(15)  # 增加状态之间的间距
+            
+            # 为该组中的每个状态创建滑块
+            for state_name in states:
+                # 找到对应的配置
+                config = next(cfg for cfg in slider_configs if cfg[0] == state_name)
+                state_layout_single = self.create_state_slider(*config)
+                states_layout.addLayout(state_layout_single)
+            
+            group_layout.addLayout(states_layout)
+            state_layout.addWidget(group_box)
         
-        # 添加分组到主状态布局
-        # state_layout.addWidget(QLabel('Position Control'))
-        state_layout.addLayout(groups['Position'])
-        # state_layout.addWidget(QLabel('Linear Velocity Control'))
-        state_layout.addLayout(groups['Linear Velocity'])
-        
-        # state_layout.addWidget(QLabel('Orientation Control'))
-        state_layout.addLayout(groups['Orientation'])
-        # state_layout.addWidget(QLabel('Angular Velocity Control'))
-        state_layout.addLayout(groups['Angular Velocity'])
+        # 设置主状态布局的间距
+        state_layout.setSpacing(20)
+        state_layout.setContentsMargins(10, 10, 10, 10)
         
         # 图表显示  position, attitude, linear velocity, angular velocity
         self.figure = Figure(figsize=(20, 10))
@@ -341,30 +361,105 @@ class MpcDebugInterface(QWidget):
     #region --------------QT without ROS--------------------------------
     def create_state_slider(self, name, min_val, max_val):
         layout = QVBoxLayout()
+        layout.setSpacing(8)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
         
         # 标题标签
         title_label = QLabel(name)
-        layout.addWidget(title_label)
+        title_label.setAlignment(QtCore.Qt.AlignCenter)
+        title_label.setFixedWidth(80)
+        title_label.setStyleSheet("""
+            QLabel {
+                color: darkblue;
+                font-weight: bold;
+                padding: 2px;
+            }
+        """)
+        layout.addWidget(title_label, 0, QtCore.Qt.AlignCenter)
         
         # 滑块
         slider = QSlider(QtCore.Qt.Vertical)
         slider.setMinimum(int(min_val * 100))
         slider.setMaximum(int(max_val * 100))
-        slider.setValue(0)  # 设置初始值
-        slider.valueChanged.connect(lambda: self.state_changed(name, slider.value()/100.0))
-        layout.addWidget(slider)
+        slider.setValue(0)
+        slider.setFixedHeight(150)
+        slider.setFixedWidth(30)
+        slider.setStyleSheet("""
+            QSlider::groove:vertical {
+                background: #e0e0e0;
+                width: 10px;
+                border-radius: 5px;
+            }
+            QSlider::handle:vertical {
+                background: #4a90e2;
+                border: 1px solid #5c5c5c;
+                height: 18px;
+                margin: 0 -4px;
+                border-radius: 9px;
+            }
+        """)
+        slider.valueChanged.connect(lambda v: self.slider_value_changed(name, v))
+        layout.addWidget(slider, 0, QtCore.Qt.AlignCenter)
         
-        # 值标签
-        value_label = QLabel('0.00')
-        value_label.setAlignment(QtCore.Qt.AlignCenter)
-        layout.addWidget(value_label)
+        # 值输入框
+        value_input = QtWidgets.QLineEdit('0.00')
+        value_input.setAlignment(QtCore.Qt.AlignCenter)
+        value_input.setFixedWidth(100)
+        value_input.setStyleSheet("""
+            QLineEdit {
+                color: #333;
+                font-family: monospace;
+                padding: 3px;
+                background: #f5f5f5;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4a90e2;
+                background: white;
+            }
+        """)
+        # 添加输入验证器
+        validator = QtGui.QDoubleValidator(min_val, max_val, 2)
+        validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+        value_input.setValidator(validator)
+        # 连接输入框的信号
+        value_input.editingFinished.connect(lambda: self.value_input_changed(name))
+        layout.addWidget(value_input, 0, QtCore.Qt.AlignCenter)
         
         # 存储滑块和标签的引用
         self.state_sliders[name] = slider
-        self.state_labels[name] = value_label
+        self.state_labels[name] = value_input
         
         return layout
     
+    def slider_value_changed(self, name, value):
+        """处理滑块值变化"""
+        actual_value = value / 100.0
+        # 更新输入框，但不触发输入框的信号
+        self.state_labels[name].blockSignals(True)
+        self.state_labels[name].setText(f'{actual_value:.2f}')
+        self.state_labels[name].blockSignals(False)
+        # 更新状态
+        self.state_changed(name, actual_value)
+        
+    def value_input_changed(self, name):
+        """处理输入框值变化"""
+        try:
+            # 获取输入框的值
+            text_value = self.state_labels[name].text()
+            value = float(text_value)
+            # 更新滑块，但不触发滑块的信号
+            self.state_sliders[name].blockSignals(True)
+            self.state_sliders[name].setValue(int(value * 100))
+            self.state_sliders[name].blockSignals(False)
+            # 更新状态
+            self.state_changed(name, value)
+        except ValueError:
+            # 如果输入无效，恢复到滑块的值
+            slider_value = self.state_sliders[name].value() / 100.0
+            self.state_labels[name].setText(f'{slider_value:.2f}')
+
     def state_changed(self, axis, value):
         print("state changed: ", axis, value)
         
@@ -373,58 +468,49 @@ class MpcDebugInterface(QWidget):
         # 转换为欧拉角
         euler = R.from_quat(current_quat).as_euler('xyz', degrees=True)
         
-        if 'Position X' in axis:
+        if 'X' in axis:
             self.state[0] = value
-        elif 'Position Y' in axis:
+        elif 'Y' in axis:
             self.state[1] = value
-        elif 'Position Z' in axis:
+        elif 'Z' in axis:
             self.state[2] = value
-        elif 'Roll' in axis:
-            euler[0] = value
+        elif 'roll' in axis:
+            euler[0] = value  # value已经是度数
             quat = R.from_euler('xyz', euler, degrees=True).as_quat()
             self.state[3:7] = quat
-        elif 'Pitch' in axis:
-            euler[1] = value
+        elif 'pitch' in axis:
+            euler[1] = value  # value已经是度数
             quat = R.from_euler('xyz', euler, degrees=True).as_quat()
             self.state[3:7] = quat
-        elif 'Yaw' in axis:
-            euler[2] = value
+        elif 'yaw' in axis:
+            euler[2] = value  # value已经是度数
             quat = R.from_euler('xyz', euler, degrees=True).as_quat()
             self.state[3:7] = quat
-        elif 'Vel X' in axis:
+        elif 'vx' in axis:
             self.state[7] = value
-        elif 'Vel Y' in axis:
+        elif 'vy' in axis:
             self.state[8] = value
-        elif 'Vel Z' in axis:
+        elif 'vz' in axis:
             self.state[9] = value
-        elif 'Ang Vel X' in axis:
-            self.state[10] = value
-        elif 'Ang Vel Y' in axis:
-            self.state[11] = value
-        elif 'Ang Vel Z' in axis:
-            self.state[12] = value
-        
-        # 更新显示的值
-        self.state_labels[axis].setText(f'{value:.2f}')
+        elif 'wx' in axis:
+            self.state[10] = np.radians(value)  # 转换为弧度
+        elif 'wy' in axis:
+            self.state[11] = np.radians(value)  # 转换为弧度
+        elif 'wz' in axis:
+            self.state[12] = np.radians(value)  # 转换为弧度
         
         # 如果是姿态变化，更新所有姿态滑块
-        if any(name in axis for name in ['Roll', 'Pitch', 'Yaw']):
-            euler = R.from_quat(self.state[3:7]).as_euler('xyz', degrees=True)
-            self.state_sliders['Roll'].blockSignals(True)
-            self.state_sliders['Pitch'].blockSignals(True)
-            self.state_sliders['Yaw'].blockSignals(True)
-            
-            self.state_sliders['Roll'].setValue(int(euler[0]))
-            self.state_sliders['Pitch'].setValue(int(euler[1]))
-            self.state_sliders['Yaw'].setValue(int(euler[2]))
-            
-            self.state_labels['Roll'].setText(f'{euler[0]:.2f}')
-            self.state_labels['Pitch'].setText(f'{euler[1]:.2f}')
-            self.state_labels['Yaw'].setText(f'{euler[2]:.2f}')
-            
-            self.state_sliders['Roll'].blockSignals(False)
-            self.state_sliders['Pitch'].blockSignals(False)
-            self.state_sliders['Yaw'].blockSignals(False)
+        # if any(name in axis for name in ['roll', 'pitch', 'yaw']):
+        #     euler = R.from_quat(self.state[3:7]).as_euler('xyz', degrees=True)
+        #     for name, value in zip(['roll', 'pitch', 'yaw'], euler):
+        #         self.state_sliders[name].blockSignals(True)
+        #         self.state_labels[name].blockSignals(True)
+                
+        #         self.state_sliders[name].setValue(int(value))
+        #         self.state_labels[name].setText(f'{value:.2f}')
+                
+        #         self.state_sliders[name].blockSignals(False)
+        #         self.state_labels[name].blockSignals(False)
         
     def time_changed(self, value):
         # 发布新的时间戳
@@ -432,7 +518,7 @@ class MpcDebugInterface(QWidget):
         if self.using_ros:
             self.time_pub.publish(Float64(value))
         
-        # self.time_label.setText(f'{value} ms')
+        self.time_label.setText(f'{value} ms')
         
         self.mpc_ref_index = int(value / self.dt_traj_opt)
         
@@ -484,21 +570,8 @@ class MpcDebugInterface(QWidget):
         control_ref = np.array(self.traj_solver.us_squash)
         self.update_control_plot(control_predict, control_ref)
         
-        # 更新求解时间图
-        self.ax_time.clear()
-        self.ax_time.set_title('MPC Solve Time')
-        self.ax_time.set_xlabel('Iteration')
-        self.ax_time.set_ylabel('Time (ms)')
-        
-        if self.mpc_solve_time_history:
-            times = range(len(self.mpc_solve_time_history))
-            self.ax_time.plot(times, [t*1000 for t in self.mpc_solve_time_history], 'b-', label='Solve Time')
-            self.ax_time.axhline(y=np.mean([t*1000 for t in self.mpc_solve_time_history]), color='r', linestyle='--', label='Mean')
-            self.ax_time.legend()
-        
-        # 自动调整子图布局
-        self.figure.tight_layout()
-        self.canvas.draw()
+        # update solving time plot
+        self.update_solving_time_plot()
         
     def update_state_plot(self, state_predict, state_ref):
         self.ax_state.clear()
@@ -549,15 +622,15 @@ class MpcDebugInterface(QWidget):
         
         # 绘制欧拉角
         self.ax_attitude.plot(predict_time,
-                            euler_predict[:, 0], label='Roll')
+                            euler_predict[:, 0], label='Roll', color='red')
         self.ax_attitude.plot(predict_time,
-                            euler_predict[:, 1], label='Pitch')
+                            euler_predict[:, 1], label='Pitch', color='green')
         self.ax_attitude.plot(predict_time,
-                            euler_predict[:, 2], label='Yaw')
+                            euler_predict[:, 2], label='Yaw', color='blue')
         
-        self.ax_attitude.plot(ref_time, euler_ref[:, 0], label='Roll SP', linestyle='--')
-        self.ax_attitude.plot(ref_time, euler_ref[:, 1], label='Pitch SP', linestyle='--')
-        self.ax_attitude.plot(ref_time, euler_ref[:, 2], label='Yaw SP', linestyle='--')
+        self.ax_attitude.plot(ref_time, euler_ref[:, 0], label='Roll SP', linestyle='--', color='red')
+        self.ax_attitude.plot(ref_time, euler_ref[:, 1], label='Pitch SP', linestyle='--', color='green')
+        self.ax_attitude.plot(ref_time, euler_ref[:, 2], label='Yaw SP', linestyle='--', color='blue')
         
         self.ax_attitude.legend()
         
@@ -624,15 +697,33 @@ class MpcDebugInterface(QWidget):
         predict_start_time = self.mpc_ref_index * self.dt_traj_opt / 1000.0
         predict_time = predict_start_time + np.arange(len(control_predict)) * self.dt_mpc / 1000.0
         
+        colors = ['red', 'green', 'blue', 'purple', 'orange', 'brown', 'pink', 'gray']
+        
         control_num = control_predict.shape[1]
         for i in range(control_num):
             self.ax_control.plot(predict_time,
-                                 control_predict[:, i], label='Control_{}'.format(i))
+                                 control_predict[:, i], label='Control_{}'.format(i), color=colors[i])
             self.ax_control.plot(ref_time, control_ref[:, i],
-                                 label='Control_ref_{}'.format(i), linestyle='--')
+                                 label='Control_ref_{}'.format(i), linestyle='--', color=colors[i])
         
         self.ax_control.legend()
         
+    def update_solving_time_plot(self):
+        self.ax_time.clear()
+        self.ax_time.set_title('MPC Solve Time')
+        self.ax_time.set_xlabel('Iteration')
+        self.ax_time.set_ylabel('Time (ms)')
+        
+        if self.mpc_solve_time_history:
+            times = range(len(self.mpc_solve_time_history))
+            self.ax_time.plot(times, [t*1000 for t in self.mpc_solve_time_history], 'b-', label='Solve Time')
+            self.ax_time.axhline(y=np.mean([t*1000 for t in self.mpc_solve_time_history]), color='r', linestyle='--', label='Mean')
+            self.ax_time.legend()
+        
+        # 自动调整子图布局
+        self.figure.tight_layout()
+        self.canvas.draw()
+    
     #endregion
 
 
