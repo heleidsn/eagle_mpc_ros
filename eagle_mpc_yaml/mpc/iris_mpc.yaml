@@ -4,9 +4,9 @@ mpc_controller:
     urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/iris_description/robots/iris_simple.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/iris.yaml"
   integration_method: "IntegratedActionModelEuler"
-  knots: 60
+  knots: 50
   solver: "SolverSbFDDP"
-  iters: 2
+  iters: 100
   dt: 20
 
   carrot_weight: 1000

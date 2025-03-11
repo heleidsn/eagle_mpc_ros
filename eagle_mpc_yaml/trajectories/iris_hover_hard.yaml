@@ -30,7 +30,49 @@ trajectory:
           type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "iris__base_link"
-          position: [2, 1, 3]
+          position: [1.5, 0, 1.8]
+          orientation: [0.53, -0.46, 0.44, 0.55] # x,y,z,w
+
+        - name: "motion_base_link"
+          type: "ResidualModelFrameVelocity"
+          weight: 1
+          link_name: "iris__base_link"
+          linear: [0, 0, 0]
+          angular: [0, 0, 0]
+
+        - name: "reg_control"
+          type: "ResidualModelControl"
+          weight: 5e-2
+          reference: [0, 0, 0, 0]
+          activation: "ActivationModelWeightedQuad"
+          weights: [1, 1, 1, 1]
+
+    - name: "navigation_1"
+      duration: 2000 #ms
+      transition: true
+      costs:
+        - name: "reg_state"
+          type: "ResidualModelState"
+          weight: 1e-5
+          reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+          activation: "ActivationModelWeightedQuad"
+          weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+        - name: "reg_control"
+          type: "ResidualModelControl"
+          weight: 5e-2
+          reference: [0, 0, 0, 0]
+          activation: "ActivationModelWeightedQuad"
+          weights: [1, 1, 1, 1]
+
+    - name: "hover_1"
+      duration: 0 #ms
+      costs:
+        - name: "placement_base_link"
+          type: "ResidualModelFramePlacement"
+          weight: 2000
+          link_name: "iris__base_link"
+          position: [3.0, 0, 1.0]
           orientation: [0, 0, 0, 1] # x,y,z,w
 
         - name: "motion_base_link"
@@ -46,3 +88,4 @@ trajectory:
           reference: [0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1]
+          
