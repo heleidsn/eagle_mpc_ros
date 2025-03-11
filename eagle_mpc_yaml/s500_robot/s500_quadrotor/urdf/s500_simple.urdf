@@ -82,7 +82,7 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rotor_joint_1" type="continuous">
+  <joint name="rotor_joint_1" type="fixed">
     <origin
       xyz="0.171 0.171 0.045"
       rpy="0 0 0" />
@@ -132,7 +132,7 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rotor_joint_2" type="continuous">
+  <joint name="rotor_joint_2" type="fixed">
     <origin
       xyz="-0.171 0.171 0.045"
       rpy="0 0 0" />
@@ -182,7 +182,7 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rotor_joint_3" type="continuous">
+  <joint name="rotor_joint_3" type="fixed">
     <origin
       xyz="-0.171 -0.171 0.045"
       rpy="0 0 0" />
@@ -232,7 +232,7 @@
       </geometry>
     </collision>
   </link>
-  <joint name="rotor_joint_4" type="continuous">
+  <joint name="rotor_joint_4" type="fixed">
     <origin
       xyz="0.1701 -0.1701 0.0603"
       rpy="0 0 0" />
