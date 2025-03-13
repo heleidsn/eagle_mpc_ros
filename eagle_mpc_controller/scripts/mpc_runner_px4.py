@@ -2,12 +2,12 @@
 '''
 Author: Lei He
 Date: 2025-02-19 17:29:01
-LastEditTime: 2025-02-21 17:36:38
+LastEditTime: 2025-03-10 19:43:55
 Description: New version of MPC runner for PX4 SITL with eagle MPC
 Github: https://github.com/heleidsn
 '''
 import rospy
-from mpc_debug.utils.create_problem import get_opt_traj, create_mpc_controller
+from create_problem import get_opt_traj, create_mpc_controller
 from eagle_mpc_msgs.msg import SolverPerformance, MpcState, MpcControl
 import numpy as np
 from nav_msgs.msg import Odometry
@@ -19,9 +19,14 @@ from threading import Lock
 
 class MpcRunner:
     def __init__(self):
-        robotName = 'iris'
-        trajectoryName = 'hover'
-        self.dt_traj_opt = 20
+        
+        # self.node_params = type('NodeParams', (), {})()
+        # self.node_params.trajectory_config_path = rospy.get_param(f'{self.namespace}/trajectory_config', '')
+        # rospy.loginfo(f"Loading trajectory config from: {self.node_params.trajectory_config_path}")
+        
+        robotName = "iris"
+        trajectoryName = 'displacement_fix_yaw'
+        self.dt_traj_opt = 5
         useSquash = True
         
         yaml_file_path = "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml"
@@ -267,8 +272,8 @@ class MpcRunner:
             self.controller_time = rospy.Time.now() - self.controller_start_time
             self.mpc_ref_index = int(self.controller_time.to_sec() * 1000.0)
             
-            if self.mpc_ref_index >= 2000:
-                self.mpc_ref_index = 2000
+            # if self.mpc_ref_index >= 2000:
+            #     self.mpc_ref_index = 2000
         else:
             self.mpc_ref_index = 0
             
@@ -285,8 +290,8 @@ class MpcRunner:
         time_end = rospy.Time.now()
         self.solving_time = (time_end - time_start).to_sec()
         
-        rospy.loginfo("mpc_controller.solver.xs: %s", self.mpc_controller.solver.xs[0])
-        rospy.loginfo("mpc_controller.solver.us: %s", self.mpc_controller.solver.us_squash[0])
+        # rospy.loginfo("mpc_controller.solver.xs: %s", self.mpc_controller.solver.xs[0])
+        # rospy.loginfo("mpc_controller.solver.us: %s", self.mpc_controller.solver.us_squash[0])
 
         # publish control command
         self.publish_mavros_rate_command()

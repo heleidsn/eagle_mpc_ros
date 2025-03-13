@@ -11,7 +11,7 @@
     <arg name="Y" default="0"/>
     <!-- vehicle model and world -->
     <arg name="est" default="ekf2"/>
-    <arg name="vehicle" default="iris"/>
+    <arg name="vehicle" default="s500"/>
     <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
     <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
 
@@ -20,7 +20,7 @@
     <arg name="debug" default="false"/>
     <arg name="verbose" default="false"/>
     <arg name="paused" default="false"/>
-    <arg name="respawn_gazebo" default="false"/>
+    <arg name="respawn_gazebo" default="true"/>
     <!-- MAVROS configs -->
     <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
     <arg name="respawn_mavros" default="false"/>
@@ -54,12 +54,12 @@
 
     <!-- Robot & maneuver -->
     <arg name="mav_name" default="iris" />
-    <arg name="trajectory_name" default="hover" />
+    <arg name="trajectory_name" default="displacement_fix_yaw" />
     <arg name="arm_enable" default="false" />
     <arg name="arm_name" default="flying_arm_3" />
 
     <!-- Trajectory optimization -->
-    <arg name="trajectory_dt" default="10" />
+    <arg name="trajectory_dt" default="5" />
     <arg name="trajectory_solver" default="SolverSbFDDP" />
     <arg name="trajectory_integration" default="IntegratedActionModelEuler" />
 
@@ -69,7 +69,7 @@
     <arg name="motor_command_dt" default="4" />
 
     <arg name="use_roll_pitch_yawrate_thrust_control" default="false" />
-    <arg name="use_mpc_runner" default="false" />
+    <arg name="use_mpc_runner" default="true" />
 
     <!-- Simulation environment-->
     <arg name="groundtruth" default="false" />
@@ -86,6 +86,9 @@
     <arg name="namespace_mpc" default="$(arg mpc_type)" />
     <arg name="mpc_config" value="$(arg mav_name)_mpc.yaml" unless="$(arg arm_enable)" />
     <arg name="mpc_config" value="$(arg mav_name)_$(arg arm_name)_mpc.yaml" if="$(arg arm_enable)" />
+
+    <node pkg="geometric_controller" type="groundtruth_pub.py" name="groundtruth_pub" output="screen">
+    </node>
 
     <!-- MPC CONTROLLER -->
     <group ns="$(arg namespace_mpc)">

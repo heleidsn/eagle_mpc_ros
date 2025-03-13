@@ -58,6 +58,8 @@ class TrajectoryNode():
         self.trajectory_path = rospy.get_param(
             rospy.get_namespace() + "/trajectory_path",
             rospack.get_path('eagle_mpc_yaml') + '/trajectories/quad_hover.yaml')
+        
+        # self.trajectory_path = "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/trajectories/iris_hover.yaml"
         self.trajectory = Trajectory(self.trajectory_path)
 
         self.dt = rospy.get_param(rospy.get_namespace() + "/trajectory_dt", 10)
@@ -67,7 +69,7 @@ class TrajectoryNode():
         with open(self.trajectory.trajectory.robot_model_path, "r") as urdf_file:
             urdf_string = urdf_file.read()
 
-        rospy.set_param(namespace + "robot_description", urdf_string)
+        rospy.set_param("robot_description", urdf_string)
 
         self.xs, self.us = self.trajectory.compute(self.solverType, self.dt)
         self.us.append(self.us[-1])
