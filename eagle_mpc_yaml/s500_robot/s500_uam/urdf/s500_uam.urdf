@@ -4,8 +4,7 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
   name="s500_uam">
-  <link
-    name="base_link">
+  <link name="base_link">
     <inertial>
       <origin
         xyz="-3.9741E-05 -2.1279E-05 -0.02127"
@@ -44,8 +43,7 @@
       </geometry>
     </collision>
   </link>
-  <link
-    name="link_1">
+  <link name="link_1">
     <inertial>
       <origin
         xyz="-5.7463E-12 -0.00019643 -0.076809"
@@ -84,8 +82,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="joint_1"
+  <joint name="joint_1"
     type="continuous">
     <origin
       xyz="0.0007 0 -0.07275"
@@ -97,8 +94,7 @@
     <axis
       xyz="0 1 0" />
   </joint>
-  <link
-    name="link_2">
+  <link name="link_2">
     <inertial>
       <origin
         xyz="0.00057539 0.00024651 -0.072261"
@@ -137,8 +133,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="joint_2"
+  <joint name="joint_2"
     type="continuous">
     <origin
       xyz="0 0 -0.09925"
@@ -150,8 +145,7 @@
     <axis
       xyz="0 1 0" />
   </joint>
-  <link
-    name="link_3">
+  <link name="link_3">
     <inertial>
       <origin
         xyz="0.025274 0.000991 -0.041284"
@@ -190,8 +184,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="joint_3"
+  <joint name="joint_3"
     type="continuous">
     <origin
       xyz="-0.011 0 -0.08225"
@@ -203,8 +196,7 @@
     <axis
       xyz="0 1 0" />
   </joint>
-  <link
-    name="link_4">
+  <link name="link_4">
     <inertial>
       <origin
         xyz="0.024422 -0.0009913 -0.039818"
@@ -243,8 +235,7 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="joint_4"
+  <joint name="joint_4"
     type="continuous">
     <origin
       xyz="0.011 0 -0.08225"
