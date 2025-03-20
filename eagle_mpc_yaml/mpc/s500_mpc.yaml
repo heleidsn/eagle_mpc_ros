@@ -4,9 +4,9 @@ mpc_controller:
     urdf: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/s500_robot/s500_quadrotor/urdf/s500_simple.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/s500.yaml"
   integration_method: "IntegratedActionModelEuler"
-  knots: 30
+  knots: 50
   solver: "SolverSbFDDP"
-  iters: 4
+  iters: 2
   dt: 30
 
   carrot_weight: 1000
@@ -22,5 +22,5 @@ mpc_controller:
   carrot_state_limits_l_bound: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
   rail_weight: 30
-  rail_activation_weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  rail_activation_weights: [10, 20, 20, 1, 1, 1, 10, 5, 1, 1, 1, 1]
   rail_control_weight: 1e-1

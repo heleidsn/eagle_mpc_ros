@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="s500_uam">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-3.9741E-05 -2.1279E-05 -0.02127"
+        rpy="0 0 0" />
+      <mass
+        value="1.5" />
+      <inertia
+        ixx="0.00042201"
+        ixy="-2.0445E-06"
+        ixz="-1.0225E-06"
+        iyy="0.00073654"
+        iyz="6.0809E-08"
+        izz="0.0010532" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link_1">
+    <inertial>
+      <origin
+        xyz="-5.7463E-12 -0.00019643 -0.076809"
+        rpy="0 0 0" />
+      <mass
+        value="0.056776" />
+      <inertia
+        ixx="1.5689E-05"
+        ixy="-1.0155E-16"
+        ixz="-5.2428E-15"
+        iyy="1.3617E-05"
+        iyz="-1.6017E-09"
+        izz="8.7857E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_1"
+    type="continuous">
+    <origin
+      xyz="0.0007 0 -0.07275"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_1" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_2">
+    <inertial>
+      <origin
+        xyz="0.00057539 0.00024651 -0.072261"
+        rpy="0 0 0" />
+      <mass
+        value="0.065663" />
+      <inertia
+        ixx="1.3006E-05"
+        ixy="2.5553E-07"
+        ixz="4.4082E-09"
+        iyy="1.4985E-05"
+        iyz="-6.0777E-07"
+        izz="1.6054E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_2"
+    type="continuous">
+    <origin
+      xyz="0 0 -0.09925"
+      rpy="0 0.2936 0" />
+    <parent
+      link="link_1" />
+    <child
+      link="link_2" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_3">
+    <inertial>
+      <origin
+        xyz="0.025274 0.000991 -0.041284"
+        rpy="0 0 0" />
+      <mass
+        value="0.012158" />
+      <inertia
+        ixx="1.0667E-05"
+        ixy="-2.5213E-09"
+        ixz="3.6553E-06"
+        iyy="1.2675E-05"
+        iyz="4.2721E-09"
+        izz="2.4775E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.92157 0.92157 0.92157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_3"
+    type="continuous">
+    <origin
+      xyz="-0.011 0 -0.08225"
+      rpy="0 0.23432 3.1416" />
+    <parent
+      link="link_2" />
+    <child
+      link="link_3" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_4">
+    <inertial>
+      <origin
+        xyz="0.024422 -0.0009913 -0.039818"
+        rpy="0 0 0" />
+      <mass
+        value="0.012587" />
+      <inertia
+        ixx="1.1294E-05"
+        ixy="2.4212E-09"
+        ixz="4.0228E-06"
+        iyy="1.352E-05"
+        iyz="-4.1022E-09"
+        izz="2.6966E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.92157 0.92157 0.92157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://s500_uam/meshes/link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_4"
+    type="continuous">
+    <origin
+      xyz="0.011 0 -0.08225"
+      rpy="0 0.26237 0" />
+    <parent
+      link="link_2" />
+    <child
+      link="link_4" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+</robot>
