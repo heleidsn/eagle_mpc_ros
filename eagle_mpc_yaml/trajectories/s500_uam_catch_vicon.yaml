@@ -42,7 +42,7 @@ trajectory:
           weight: 100
           reference: [0, 0, 1.2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
-          weights: [1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1000, 1000]
+          weights: [10, 10, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1000, 1000]
 
         - name: "reg_control"
           type: "ResidualModelControl"
