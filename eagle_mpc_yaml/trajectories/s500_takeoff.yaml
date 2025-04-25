@@ -6,7 +6,7 @@ trajectory:
 
   stages:
     - name: "navigation"
-      duration: 3000 #ms
+      duration: 2000 #ms
       transition: true
       costs:
         - name: "reg_state"
