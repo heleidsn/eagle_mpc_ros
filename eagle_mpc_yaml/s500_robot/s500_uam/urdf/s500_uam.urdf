@@ -24,7 +24,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/base_link.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -38,7 +38,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/base_link.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -63,7 +63,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/iris_prop_ccw.dae" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/iris_prop_ccw.dae" />
       </geometry>
       <material
         name="">
@@ -77,7 +77,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/rotor_1.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/rotor_1.STL" />
       </geometry>
     </collision>
   </link>
@@ -113,7 +113,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/iris_prop_ccw.dae" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/iris_prop_ccw.dae" />
       </geometry>
       <material
         name="">
@@ -127,7 +127,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/rotor_2.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/rotor_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -163,7 +163,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/iris_prop_cw.dae" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/iris_prop_cw.dae" />
       </geometry>
       <material
         name="">
@@ -177,7 +177,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/rotor_3.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/rotor_3.STL" />
       </geometry>
     </collision>
   </link>
@@ -213,7 +213,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/iris_prop_cw.dae" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/iris_prop_cw.dae" />
       </geometry>
       <material
         name="">
@@ -227,7 +227,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_quadrotor/meshes/rotor_4.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_quadrotor/meshes/rotor_4.STL" />
       </geometry>
     </collision>
   </link>
@@ -263,7 +263,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_1.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_1.STL" />
       </geometry>
       <material
         name="">
@@ -277,7 +277,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_1.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_1.STL" />
       </geometry>
     </collision>
   </link>
@@ -314,7 +314,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_2.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_2.STL" />
       </geometry>
       <material
         name="">
@@ -328,7 +328,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_2.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -365,7 +365,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_3.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_3.STL" />
       </geometry>
       <material
         name="">
@@ -379,7 +379,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_3.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_3.STL" />
       </geometry>
     </collision>
   </link>
@@ -416,7 +416,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_4.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_4.STL" />
       </geometry>
       <material
         name="">
@@ -430,7 +430,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://s500_uam/meshes/link_4.STL" />
+          filename="package://eagle_mpc_yaml/s500_robot/s500_uam/meshes/link_4.STL" />
       </geometry>
     </collision>
   </link>
