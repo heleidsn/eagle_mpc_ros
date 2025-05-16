@@ -4,11 +4,15 @@ Header header
 # 状态向量
 float64[] state          # 完整状态向量
 float64[] state_ref      # 参考状态向量
+float64[] state_ref_next  # 参考状态向量（下一个时刻）
 float64[] state_error    # 状态误差
 
 # MPC debug information
 int32 mpc_time_step      # 迭代位置
+int32 mpc_iter_num          # 迭代次数
 float64 solving_time     # 求解时间
+float64 mpc_final_cost   # final cost
+float64 mpc_start_cost   # final cost with reference
 
 float64[] u_mpc           # MPC控制指令
 
