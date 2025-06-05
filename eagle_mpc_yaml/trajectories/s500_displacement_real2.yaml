@@ -4,7 +4,7 @@ trajectory:
     urdf: "/home/jetson/catkin_ams/src/eagle_mpc_ros/eagle_mpc_yaml/s500_robot/s500_quadrotor/urdf/s500_simple.urdf"
     follow: "/home/jetson/catkin_ams/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/s500.yaml"
 
-  initial_state: [-0.6, -0.6, 1.5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+  initial_state: [0, 0, 1.5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
 
   stages:
     
@@ -47,7 +47,7 @@ trajectory:
           type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "base_link"
-          position: [0.6, -0.6, 1.5]
+          position: [1.5, 0, 1.5]
           orientation: [0, 0, 0, 1] # x,y,z,w
 
         # - name: "motion_base_link"
@@ -96,7 +96,7 @@ trajectory:
           type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "base_link"
-          position: [0.6, 0.6, 1.5]
+          position: [1.5, 1.5, 1.5]
           # orientation: [0, 0, 1, 0] # x,y,z,w
           orientation: [0, 0, 0, 1] # x,y,z,w
 
@@ -140,7 +140,7 @@ trajectory:
           type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "base_link"
-          position: [-0.6, 0.6, 1.5]
+          position: [0.0, 1.5, 1.5]
           # orientation: [0, 0, 1, 0] # x,y,z,w
           orientation: [0, 0, 0, 1] # x,y,z,w
 
@@ -183,7 +183,7 @@ trajectory:
           type: "ResidualModelFramePlacement"
           weight: 2000
           link_name: "base_link"
-          position: [-0.6, -0.6, 1.5]
+          position: [0.0, 0.0, 1.5]
           # orientation: [0, 0, 1, 0] # x,y,z,w
           orientation: [0, 0, 0, 1] # x,y,z,w
 
