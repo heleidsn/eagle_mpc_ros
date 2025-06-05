@@ -30,3 +30,8 @@ float64[] z_tilde_tracking   # for tracking error
 
 # tracking controller
 float64[] u_tracking     # 轨迹跟踪控制指令
+
+# gripper information
+float64[] gripper_position     # gripper position in world frame [x, y, z]
+float64[] gripper_orientation  # gripper orientation in world frame [qx, qy, qz, qw]
+float64[] gripper_euler        # gripper orientation in world frame [roll, pitch, yaw] in radians

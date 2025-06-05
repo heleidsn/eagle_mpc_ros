@@ -1,7 +1,7 @@
 trajectory:
   robot:
     name: "s500_uam"
-    urdf: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/s500_robot/s500_uam/urdf/s500_uam_simple.urdf"
+    urdf: "/home/helei/catkin_eagle_mpc/src/example_robot_data/robots/s500_description/s500_uam/urdf/s500_uam_simple.urdf"
     follow: "/home/helei/catkin_eagle_mpc/src/eagle_mpc_ros/eagle_mpc_yaml/multicopter/s500.yaml"
 
   initial_state: [-1.5, 0, 1.5, 0, 0, 0, 1, -1.2, -0.6, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -16,7 +16,7 @@ trajectory:
           weight: 1e-1
           reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
           activation: "ActivationModelWeightedQuad"
-          weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+          weights: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]
 
         - name: "state_limits"
           type: "ResidualModelState"
@@ -30,7 +30,7 @@ trajectory:
         - name: "control_reg"
           type: "ResidualModelControl"
           weight: 5e-2
-          reference: [0, 0, 0, 0, 0, 0]
+          reference: [5, 5, 5, 5, 0, 0]
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 1, 1]
 
@@ -51,47 +51,47 @@ trajectory:
           activation: "ActivationModelWeightedQuad"
           weights: [1, 1, 1, 1, 10, 10]
 
-    # - name: "grasp"
-    #   duration: 1000 #ms
-    #   costs:
-    #     - name: "state_reg"
-    #       type: "ResidualModelState"
-    #       weight: 1e-3
-    #       reference: [0, 0, 1.2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    #       activation: "ActivationModelWeightedQuad"
-    #       weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    - name: "grasp"
+      duration: 200 #ms
+      costs:
+        - name: "state_reg"
+          type: "ResidualModelState"
+          weight: 1e-2
+          reference: [0, 0, 1.2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          activation: "ActivationModelWeightedQuad"
+          weights: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
 
-    #     - name: "state_limits"
-    #       type: "ResidualModelState"
-    #       weight: 10
-    #       reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    #       activation: "ActivationModelWeightedQuadraticBarrier"
-    #       weights: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]
-    #       u_bound: [0, 0, 0, 0, 0, 0, 1.9, 1.9, 0, 0, 0, 0, 0, 0, 3, 3]
-    #       l_bound:
-    #         [0, 0, 0, 0, 0, 0, -1.9, -1.9, 0, 0, 0, 0, 0, 0, -3, -3]
+        - name: "state_limits"
+          type: "ResidualModelState"
+          weight: 10
+          reference: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          activation: "ActivationModelWeightedQuadraticBarrier"
+          weights: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]
+          u_bound: [0, 0, 0, 0, 0, 0, 1.9, 1.9, 0, 0, 0, 0, 0, 0, 3, 3]
+          l_bound:
+            [0, 0, 0, 0, 0, 0, -1.9, -1.9, 0, 0, 0, 0, 0, 0, -3, -3]
 
-    #     - name: "control_reg"
-    #       type: "ResidualModelControl"
-    #       weight: 1e-2
-    #       reference: [0, 0, 0, 0, 0, 0]
-    #       activation: "ActivationModelWeightedQuad"
-    #       weights: [1, 1, 1, 1, 1, 1]
+        - name: "control_reg"
+          type: "ResidualModelControl"
+          weight: 1e-2
+          reference: [5, 5, 5, 5, 0, 0]
+          activation: "ActivationModelWeightedQuad"
+          weights: [1, 1, 1, 1, 1, 1]
 
-    #     - name: "translation_ee"
-    #       type: "ResidualModelFrameTranslation"
-    #       weight: 2000
-    #       link_name: "link_3"
-    #       position: [0, 0, 1.1]
+        - name: "translation_ee"
+          type: "ResidualModelFrameTranslation"
+          weight: 1000
+          link_name: "gripper_link"
+          position: [0, 0, 1.0]
 
-    #     - name: "motion_ee"
-    #       type: "ResidualModelFrameVelocity"
-    #       weight: 1000
-    #       link_name: "link_3"
-    #       activation: "ActivationModelWeightedQuad"
-    #       weights: [1, 1, 1, 1, 1, 1]
-    #       linear: [0, 0, 0]
-    #       angular: [0, 0, 0]
+        - name: "motion_ee"
+          type: "ResidualModelFrameVelocity"
+          weight: 100
+          link_name: "gripper_link"
+          activation: "ActivationModelWeightedQuad"
+          weights: [1, 1, 1, 0, 0, 0]
+          linear: [0, 0, 0]
+          angular: [0, 0, 0]
 
     - name: "move_away"
       duration: 2000 #ms
